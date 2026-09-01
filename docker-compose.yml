@@ -1,0 +1,95 @@
+# Local development stack — no .env file required.
+# Run: docker compose up --build
+
+services:
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: tickly_root
+      MYSQL_DATABASE: tickly
+      MYSQL_USER: tickly
+      MYSQL_PASSWORD: tickly
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', '127.0.0.1']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    ports:
+      - '8025:8025'
+
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data
+    environment:
+      MINIO_ROOT_USER: tickly
+      MINIO_ROOT_PASSWORD: ticklydev
+      MINIO_DEFAULT_BUCKETS: uploads
+    volumes:
+      - minio_data:/data
+    expose:
+      - '9000'
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      APP_KEY: tickly-local-docker-dev-key-change-me
+      HOST: 0.0.0.0
+      PORT: 3333
+      NODE_ENV: production
+      LOG_LEVEL: info
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: tickly
+      DB_PASSWORD: tickly
+      DB_DATABASE: tickly
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
+      SMTP_USERNAME: tickly
+      SMTP_PASSWORD: tickly
+      SMTP_FROM: noreply@example.com
+      DRIVE_DISK: s3
+      AWS_ACCESS_KEY_ID: tickly
+      AWS_SECRET_ACCESS_KEY: ticklydev
+      AWS_REGION: us-east-1
+      AWS_ENDPOINT: http://minio:9000
+      S3_BUCKET: uploads
+      FRONTEND_BASE_URL: http://localhost:3000
+    depends_on:
+      mysql:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+      minio:
+        condition: service_started
+    ports:
+      - '3333:3333'
+
+  admin:
+    build:
+      context: ./admin-frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_BACKEND_URL: http://localhost:3333
+        VITE_FRONTEND_URL: http://localhost:3000
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_started
+    ports:
+      - '3000:80'
+
+volumes:
+  mysql_data:
+  minio_data:

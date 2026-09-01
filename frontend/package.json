@@ -1,0 +1,154 @@
+{
+  "name": "tickly",
+  "private": true,
+  "version": "1.0.4",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "dev:electron": "vite",
+    "build:web": "vite build",
+    "build": "vite build && electron-builder",
+    "build:dir": "vite build && electron-builder --dir",
+    "build:dev": "env-cmd -f .env.dev vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "format": "prettier --write ./src"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@julr/vite-plugin-validate-env": "^2.2.0",
+    "@mui/icons-material": "^9.0.0",
+    "@mui/lab": "^9.0.0-beta.2",
+    "@mui/material": "^9.0.0",
+    "@reduxjs/toolkit": "^2.11.2",
+    "@tanstack/react-query": "^5.99.2",
+    "axios": "^1.15.2",
+    "dayjs": "^1.11.20",
+    "formik": "^2.4.9",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "react-error-boundary": "^6.1.1",
+    "react-otp-input": "^3.1.1",
+    "react-redux": "^9.2.0",
+    "react-router-dom": "^7.14.2",
+    "react-spinners": "^0.17.0",
+    "recharts": "^3.8.1",
+    "yup": "^1.7.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "@vitejs/plugin-react": "^6.0.1",
+    "babel-plugin-react-compiler": "^1.0.0",
+    "concurrently": "^9.1.0",
+    "electron": "^39.2.7",
+    "electron-builder": "^25.1.8",
+    "env-cmd": "^11.0.0",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-compiler": "^19.1.0-rc.2",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.5.0",
+    "prettier": "^3.8.3",
+    "vite": "^8.0.10",
+    "vite-plugin-electron": "^0.29.0",
+    "vite-plugin-eslint": "^1.8.1",
+    "zod-validation-error": "^4.0.0"
+  },
+  "description": "Tickly desktop application for attendance, activity, and work-hour tracking.",
+  "main": "dist-electron/main.js",
+  "keywords": [],
+  "author": {
+    "name": "Tickly Team",
+    "email": "support@the.com"
+  },
+  "license": "ISC",
+  "homepage": "https://github.com/waqasajaz/attendance-and-time-tracking",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/waqasajaz/attendance-and-time-tracking.git"
+  },
+  "build": {
+    "appId": "com.tickly.app",
+    "productName": "Tickly",
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*"
+    ],
+    "directories": {
+      "buildResources": "public",
+      "output": "release"
+    },
+    "afterPack": "scripts/mac-adhoc-sign.cjs",
+    "icon": "public/icon.png",
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.productivity",
+      "artifactName": "${productName}-${version}-mac-${arch}.${ext}",
+      "identity": null,
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false,
+      "icon": "public/icon.png",
+      "extendInfo": {
+        "NSLocationWhenInUseUsageDescription": "Tickly records your location while the timer is active for attendance monitoring.",
+        "NSLocationUsageDescription": "Tickly records your location while the timer is active for attendance monitoring."
+      }
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "zip"
+      ],
+      "artifactName": "${productName}-${version}-win-${arch}.${ext}",
+      "icon": "public/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "deleteAppDataOnUninstall": false,
+      "runAfterFinish": true
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "executableName": "tickly",
+      "executableArgs": [
+        "--no-sandbox",
+        "--no-zygote",
+        "--disable-gpu-sandbox"
+      ],
+      "category": "Utility",
+      "synopsis": "Desktop attendance and time tracking",
+      "description": "Tickly desktop application for attendance, activity, and work-hour tracking.",
+      "desktop": {
+        "Name": "Tickly",
+        "StartupWMClass": "Tickly",
+        "Categories": "Utility;Office;"
+      },
+      "maintainer": "Tickly Team <support@example.com>",
+      "artifactName": "${productName}-${version}-linux-${arch}.${ext}",
+      "icon": "public/icon.png"
+    },
+    "deb": {
+      "afterInstall": "scripts/deb-postinstall.sh",
+      "fpm": [
+        "--replaces",
+        "react-theme-4",
+        "--conflicts",
+        "react-theme-4"
+      ]
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "your-org",
+      "repo": "attendance-and-time-tracking"
+    }
+  }
+}

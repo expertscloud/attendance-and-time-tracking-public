@@ -1,0 +1,10 @@
+{
+  "eslint.enable": true,
+  "eslint.format.enable": true,
+  "eslint.lintTask.enable": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "eslint.workingDirectories": ["."],
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"]
+}
