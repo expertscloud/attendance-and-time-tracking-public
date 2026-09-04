@@ -1,0 +1,28 @@
+
+
+services:
+  release:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.release
+    env_file:
+      - path: .env.release
+        required: false
+    environment:
+      VITE_FRONTEND_URL: ${VITE_FRONTEND_URL:-http://localhost:3000}
+      VITE_BACKEND_URL: ${VITE_BACKEND_URL:-http://localhost:3333}
+      VITE_GOOGLE_API_KEY: ${VITE_GOOGLE_API_KEY:-}
+    volumes:
+      - ./frontend/release:/app/release
+      - ./INSTALL.md:/INSTALL.md:ro
+    command:
+      - sh
+      - -c
+      - |
+        npm run build:web &&
+        npx electron-builder --linux --publish never &&
+        echo "" &&
+        echo "Release files:" &&
+        ls -1 /app/release/*.{deb,AppImage} 2>/dev/null || true &&
+        echo "" &&
+        cat /INSTALL.md

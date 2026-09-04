@@ -54,5 +54,6 @@ export default await Env.create(new URL('../', import.meta.url), {
   S3_BUCKET: Env.schema.string(),
   AWS_S3_SIGNED_URL_EXPIRY_DAYS: Env.schema.string.optional(),
   OTP_EXPIRES_TIME_IN_SEC: Env.schema.number.optional(),
-  FRONTEND_BASE_URL: Env.schema.string({ format: 'url' }),
+  // Plain string — strict `url` format rejects `localhost` in Docker/local dev.
+  FRONTEND_BASE_URL: Env.schema.string(),
 })

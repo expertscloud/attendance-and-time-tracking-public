@@ -1,0 +1,69 @@
+# Builds Linux (.deb + .AppImage) and Windows (.exe) desktop installers.
+# macOS (.dmg) must be built on a Mac — see INSTALL.md.
+#
+# Usage (from frontend/):
+#   docker build -f Dockerfile.release -t my-release-image .
+#   docker run --env-file .env.release my-release-image
+#
+# To copy installers to your host, add a volume mount:
+#   docker run --env-file .env.release -v ./release:/app/release my-release-image
+
+FROM electronuserland/builder:wine
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY . .
+
+ENV ELECTRON_CACHE=/root/.cache/electron
+ENV ELECTRON_BUILDER_CACHE=/root/.cache/electron-builder
+
+CMD ["sh", "-c", "\
+  set -e && \
+  echo '========================================' && \
+  echo '  Building Tickly Desktop Installers'     && \
+  echo '========================================' && \
+  echo '' && \
+  echo '=> Building web + electron bundles...' && \
+  npm run build:web && \
+  echo '' && \
+  echo '=> Building Linux installers (.deb + .AppImage)...' && \
+  npx electron-builder --linux --publish never && \
+  echo '' && \
+  echo '=> Building Windows installer (.exe)...' && \
+  npx electron-builder --win --publish never && \
+  echo '' && \
+  echo '========================================' && \
+  echo '  Release files:'                         && \
+  echo '========================================' && \
+  ls -1 /app/release/*.deb 2>/dev/null || true && \
+  ls -1 /app/release/*.AppImage 2>/dev/null || true && \
+  ls -1 /app/release/*.exe 2>/dev/null || true && \
+  ls -1 /app/release/*.zip 2>/dev/null || true && \
+  echo '' && \
+  echo '========================================' && \
+  echo '  Install Instructions'                   && \
+  echo '========================================' && \
+  echo '' && \
+  echo '--- Linux (Debian/Ubuntu) ---' && \
+  echo 'sudo apt install ./release/Tickly-*-linux-amd64.deb' && \
+  echo 'Launch: tickly' && \
+  echo '' && \
+  echo '--- Linux (other distros — AppImage) ---' && \
+  echo 'chmod +x ./release/Tickly-*-linux-x86_64.AppImage' && \
+  echo './release/Tickly-*-linux-x86_64.AppImage' && \
+  echo '' && \
+  echo '--- Windows ---' && \
+  echo 'Double-click Tickly-*-win-x64.exe and follow the wizard.' && \
+  echo '' && \
+  echo '--- macOS (must build on a Mac) ---' && \
+  echo 'cd frontend && cp .env.example .env && npm install && npm run build' && \
+  echo 'Output: release/Tickly-*-mac-arm64.dmg or Tickly-*-mac-x64.dmg' && \
+  echo 'Open .dmg, drag Tickly to Applications, run: xattr -cr /Applications/Tickly.app' && \
+  echo '' && \
+  echo '========================================' && \
+  echo '  Done!' && \
+  echo '========================================'  \
+"]

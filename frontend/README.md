@@ -44,8 +44,20 @@ Other useful scripts:
 
 ```bash
 npm run dev:electron          # Vite dev server without --host
-npm run build                 # build the web bundle and package the desktop app
+npm run build                 # build the web bundle and package the desktop app (native OS)
 npm run build:dir             # package unpacked (faster, for local testing)
 npm run lint                  # ESLint
 npm run format                # Prettier
 ```
+
+Build Linux + Windows installers via Docker (from `frontend/`):
+
+```bash
+cp .env.release.example .env.release   # edit VITE_BACKEND_URL if needed
+docker build -f Dockerfile.release -t my-release-image .
+docker run --rm --env-file .env.release -v ./release:/app/release my-release-image
+```
+
+Installers land in `release/`. Install instructions are printed in the terminal.
+
+macOS must be built on a Mac — see [INSTALL.md](../INSTALL.md).

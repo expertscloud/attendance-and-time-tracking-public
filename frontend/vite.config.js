@@ -19,6 +19,7 @@ export default defineConfig({
         // Linux (Chromium's network provider). Optional so web/dev builds
         // don't fail.
         VITE_GOOGLE_API_KEY: Schema.string.optional(),
+        VITE_UPDATES_URL: Schema.string.optional(),
       },
     }),
     react({

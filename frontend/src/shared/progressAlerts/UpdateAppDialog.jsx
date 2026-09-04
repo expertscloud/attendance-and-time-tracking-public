@@ -16,17 +16,28 @@ const UpdateAppDialog = () => {
           continue using it.
         </Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center' }}>
-          <Button
-            variant="contained"
-            color="primary"
-            size="large"
-            href="https://github.com/waqasajaz/attendance-and-time-tracking-releases/releases"
-            target="_blank"
-            rel="noopener noreferrer"
-            sx={{ px: 4, py: 1.5, fontWeight: 600, textTransform: 'none', width: '100%' }}
-          >
-            Update Now
-          </Button>
+          {import.meta.env.VITE_UPDATES_URL ? (
+            <Button
+              variant="contained"
+              color="primary"
+              size="large"
+              href={import.meta.env.VITE_UPDATES_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{ px: 4, py: 1.5, fontWeight: 600, textTransform: 'none', width: '100%' }}
+            >
+              Update Now
+            </Button>
+          ) : (
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+              Ask your administrator for the latest installer, or build from source:
+              <Box component="span" sx={{ fontFamily: 'monospace', fontSize: '0.85rem', display: 'block', mt: 1 }}>
+                docker build -f Dockerfile.release -t my-release-image .
+                <br />
+                docker run --env-file .env.release my-release-image
+              </Box>
+            </Typography>
+          )}
         </Box>
       </DialogContent>
     </Dialog>

@@ -41,6 +41,7 @@ tmp
 
 # Secrets
 .env
+.env.release
 .env.local
 .env.production.local
 .env.development.local

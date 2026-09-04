@@ -164,40 +164,23 @@ The **employee desktop app** is not in Docker — build it separately (see below
 
 ---
 
-## Desktop app binaries (Electron)
+## Desktop app (employee Electron app)
 
-The employee app lives in `frontend/` and is packaged with **electron-builder**.
-
-### Local build
+Build **Linux + Windows installers** with Docker — no Compose needed.
 
 ```bash
 cd frontend
-cp .env.example .env
-# Set VITE_BACKEND_URL to your running API (e.g. http://localhost:3333 for Docker)
-npm install
-npm run build          # Installers (.exe, .dmg, .AppImage, .deb)
-# or
-npm run build:dir      # Unpacked folder (faster, for testing)
+cp .env.release.example .env.release   # edit VITE_BACKEND_URL if needed
+docker build -f Dockerfile.release -t my-release-image .
+docker run --rm --env-file .env.release -v ./release:/app/release my-release-image
 ```
 
-Output goes to `frontend/release/`.
+- Builds `.deb` + `.AppImage` (Linux) and `.exe` (Windows) into `frontend/release/`
+- Prints install instructions in the terminal when done
 
-| Platform | Typical output |
+Edit `.env.release` to change the API URL baked into the app.
+
+| Platform | How to build |
 |----------|----------------|
-| Windows | `Tickly-*-win-x64.exe` |
-| macOS | `Tickly-*-mac-*.dmg` |
-| Linux | `Tickly-*-linux-x64.AppImage`, `.deb` |
-
-**Important:** `VITE_BACKEND_URL` is baked in at build time. Rebuild the desktop app whenever the API URL changes.
-
-### CI builds (GitHub Actions)
-
-The workflow `.github/workflows/build-desktop.yml` builds desktop artifacts on:
-
-- **Manual run** — Actions → “Build desktop app” → set `backend_url`
-- **Git tag** — push a tag like `v1.0.5` to create a GitHub Release with attached binaries
-
-```bash
-git tag v1.0.5
-git push origin v1.0.5
-```
+| **Linux + Windows** | Docker commands above |
+| **macOS** | Must build on a Mac — see [INSTALL.md](INSTALL.md) |
