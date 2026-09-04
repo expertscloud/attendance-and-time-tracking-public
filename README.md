@@ -14,10 +14,10 @@ At its core, the platform answers three questions for an organization:
 
 It is made up of three parts:
 
-| Component | Audience | What it is |
-|-----------|----------|------------|
-| **Backend API** (`backend/`) | — | AdonisJS 6 + MySQL REST API; the single source of truth. |
-| **Employee Desktop App** (`frontend/`) | Employees | Electron + React app for daily attendance and time tracking. |
+| Component                               | Audience    | What it is                                                               |
+| --------------------------------------- | ----------- | ------------------------------------------------------------------------ |
+| **Backend API** (`backend/`)            | —           | AdonisJS 6 + MySQL REST API; the single source of truth.                 |
+| **Employee Desktop App** (`frontend/`)  | Employees   | Electron + React app for daily attendance and time tracking.             |
 | **Admin Web Panel** (`admin-frontend/`) | Admins / HR | React web app to manage users, projects, clients, and review attendance. |
 
 ---
@@ -94,71 +94,61 @@ The AdonisJS service that both apps talk to.
 
 Both clients are thin: the desktop app drives the timer and idle detection locally but persists everything through the API; the admin panel is a management UI over the same data.
 
----
-
-## Running locally
-
-Each component has its own setup. In short:
-
-```bash
-# Backend (requires Node 20, MySQL 8, SMTP; S3 for uploads)
-cd backend
-cp .env.example .env          # configure DB, mail, S3, app key
-npm install
-node ace migration:run
-npm run dev
-
-# Employee desktop app
-cd frontend
-cp .env.example .env          # point VITE_BACKEND_URL at the backend
-npm install
-npm run dev                   # opens the Electron window against Vite
-
-# Admin web panel
-cd admin-frontend
-cp .env.example .env          # point VITE_BACKEND_URL at the backend
-npm install
-npm run dev
-```
-
-See each component's own README / `.env.example` for the full list of required variables.
 
 ---
 
 ## Docker Compose (recommended quick start)
 
-Runs **MySQL**, **Backend API**, **Admin panel**, and **Mailpit** (test email). File uploads work automatically — no extra setup, no `.env` file, no cloud accounts.
+Runs **MySQL**, **Backend API**, **Admin panel**, and **Mailpit** (test email). Profile photos upload to **AWS S3**.
 
 ### Start everything
 
 ```bash
+cp .env.example .env
+# fill AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, S3_BUCKET
 docker compose up --build
 ```
 
-That's it. First run takes a few minutes to build images; later runs start in seconds.
+First run takes a few minutes to build images; later runs start in seconds.
+
+### AWS S3 setup
+
+Create an S3 bucket and IAM access keys, then put them in the root `.env`:
+
+| Variable | Example |
+|----------|---------|
+| `AWS_ACCESS_KEY_ID` | your IAM access key |
+| `AWS_SECRET_ACCESS_KEY` | your IAM secret key |
+| `AWS_REGION` | `us-east-1` |
+| `S3_BUCKET` | your bucket name |
+| `AWS_S3_SIGNED_URL_EXPIRY_DAYS` | `4 days` (optional) |
+
+Leave `AWS_ENDPOINT` unset — that is only for local S3-compatible tools, not real AWS.
 
 ### URLs
 
-| Service | URL |
-|---------|-----|
-| Admin panel | http://localhost:3000 |
-| Backend API | http://localhost:3333 |
+| Service               | URL                   |
+| --------------------- | --------------------- |
+| Admin panel           | http://localhost:3000 |
+| Backend API           | http://localhost:3333 |
 | Test emails (Mailpit) | http://localhost:8025 |
 
-### Default login
+### Default logins (created by seeders)
 
-| Field | Value |
-|-------|-------|
-| Email | `admin@example.com` |
-| Password | `Abc@1234` |
+| Role     | Email                  | Password        | Use for         |
+| -------- | ---------------------- | --------------- | --------------- |
+| Admin    | `admin@example.com`    | `Admin@1234`    | Admin web panel |
+| Employee | `employee@example.com` | `Employee@1234` | Desktop app     |
+
+Seeders also create a **Demo Client**, **Demo Project**, and assign the employee to that project — no manual setup needed.
 
 ### What runs automatically
 
 - **mysql** — database (persisted in a Docker volume)
-- **backend** — migrations, seed data, then API on port 3333
+- **backend** — migrations, seed data (admin, employee, sample project), then API on port 3333
 - **admin** — admin web UI on port 3000
 - **mailpit** — catches password-reset and other emails for local testing
-- **minio** — internal file storage for profile photos (not exposed; developers never configure it)
+- **AWS S3** — profile-photo storage (configured via root `.env`)
 
 The **employee desktop app** is not in Docker — build it separately (see below) and point it at `http://localhost:3333`.
 
@@ -178,9 +168,22 @@ docker run --rm --env-file .env.release -v ./release:/app/release my-release-ima
 - Builds `.deb` + `.AppImage` (Linux) and `.exe` (Windows) into `frontend/release/`
 - Prints install instructions in the terminal when done
 
-Edit `.env.release` to change the API URL baked into the app.
 
-| Platform | How to build |
-|----------|----------------|
-| **Linux + Windows** | Docker commands above |
-| **macOS** | Must build on a Mac — see [INSTALL.md](INSTALL.md) |
+### Google Maps / Geolocation key (`VITE_GOOGLE_API_KEY`)
+
+Needed for **location tracking on Windows and Linux** installers (macOS uses native CoreLocation and does not need this key).
+
+1. Open [Google Cloud Console](https://console.cloud.google.com/)
+2. Create or select a project
+3. Enable **Geolocation API** (APIs & Services → Library → search “Geolocation API” → Enable)
+4. Create an API key (APIs & Services → Credentials → Create credentials → API key)
+5. Paste the key into `frontend/.env.release` as `VITE_GOOGLE_API_KEY=...`
+6. Rebuild the Docker release image so the key is baked into the app
+
+If you leave `VITE_GOOGLE_API_KEY` empty, the app still builds, but geolocation will not work on Windows/Linux.
+
+| Platform            | How to build                                      |
+| ------------------- | ------------------------------------------------- |
+| **Linux + Windows** | Docker commands above                             |
+| **macOS**           | See [macos_build.md](macos_build.md)              |
+| **Windows (native)**| See [windows_os_build.md](windows_os_build.md)    |

@@ -35,43 +35,15 @@ chmod +x ~/Applications/tickly.AppImage
 
 ---
 
-## macOS — build on a Mac (Docker cannot build .dmg)
+## macOS
 
-```bash
-cd frontend
-cp .env.example .env
-# set VITE_BACKEND_URL in .env
-npm install && npm run build
-```
-
-Output: `frontend/release/Tickly-*-mac-arm64.dmg` (Apple Silicon) or `Tickly-*-mac-x64.dmg` (Intel).
-
-1. Open the matching `.dmg`
-2. Drag **Tickly** into **Applications**
-3. Run once: `xattr -cr "/Applications/Tickly.app"`
-4. Launch from Applications / Launchpad
-
-**Notifications:** System Settings → Notifications → Tickly → Allow → Persistent alerts.  
-**Auto-launch:** System Settings → General → Login Items → **+** → Tickly.
+See [macos_build.md](macos_build.md).
 
 ---
 
-## Windows — build on Windows (Docker cannot build .exe)
+## Windows
 
-```bash
-cd frontend
-copy .env.example .env
-rem set VITE_BACKEND_URL in .env
-npm install && npm run build
-```
-
-Output: `frontend/release/Tickly-*-win-x64.exe`
-
-1. Double-click the `.exe`
-2. Follow the installer wizard
-
-**Notifications:** Settings → System → Notifications → Tickly → On.  
-**Auto-launch:** Settings → Apps → Startup → Tickly → On.
+See [windows_os_build.md](windows_os_build.md).
 
 ---
 

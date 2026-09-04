@@ -2,16 +2,16 @@ import { UserTypeEnum } from '#enums/user_type_enum'
 import User from '#models/user'
 import { BaseSeeder } from '@adonisjs/lucid/seeders'
 
-export default class UserSeeder extends BaseSeeder {
+export default class EmployeeSeeder extends BaseSeeder {
   public async run() {
     await User.updateOrCreate(
-      { id: 1 },
+      { id: 2 },
       {
-        id: 1,
-        email: 'admin@example.com',
-        password: 'Admin@1234',
-        fullName: 'Super Admin',
-        type: UserTypeEnum.superAdmin,
+        id: 2,
+        email: 'employee@example.com',
+        password: 'Employee@1234',
+        fullName: 'Demo Employee',
+        type: UserTypeEnum.user,
         isActive: true,
       }
     )
